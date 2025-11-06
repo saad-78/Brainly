@@ -28,6 +28,7 @@ export function CreateContentModal({
   const linkRef = useRef<HTMLInputElement>(null);
   const [type, setType] = useState(ContentType.Youtube);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [description, setDescription] = useState(""); // NEW: Store description
 
   const detectContentType = (link: string): ContentType => {
     if (!link) return ContentType.Youtube;
@@ -73,13 +74,19 @@ export function CreateContentModal({
       setIsSubmitting(true);
       await axios.post(
         `${BACKEND_URL}/api/v1/content`,
-        { link, title, type: finalType, shareHash },
+        { 
+          link, 
+          title, 
+          type: finalType, 
+          shareHash,
+          description: description, // NEW: Send description
+        },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
 
       if (titleRef.current) titleRef.current.value = "";
       if (linkRef.current) linkRef.current.value = "";
-      setType(ContentType.Youtube); // Reset to default
+      setDescription(""); // NEW: Reset description
 
       toast.success("Content added successfully!");
       onSuccess?.();
@@ -133,6 +140,13 @@ export function CreateContentModal({
               placeholder="Paste link here..."
               onChange={handleLinkChange}
               className="w-full bg-zinc-800/50 border border-zinc-700 text-white placeholder-zinc-500 px-4 py-3 rounded-xl focus:outline-none focus:border-zinc-600 transition-all"
+            />
+            {/* NEW: Add description textarea */}
+            <textarea
+              placeholder="Add a summary or key points from the video/post..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full bg-zinc-800/50 border border-zinc-700 text-white placeholder-zinc-500 px-4 py-3 rounded-xl focus:outline-none focus:border-zinc-600 transition-all resize-none h-20"
             />
           </div>
 

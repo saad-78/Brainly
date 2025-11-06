@@ -63,11 +63,10 @@ export function Sidebar({
       <div className="flex flex-col gap-2 flex-1">
         {/* Twitter Filter */}
         <div
-          className={`flex items-center justify-between rounded-lg px-4 py-3 cursor-pointer transition-all duration-200 ${
-            selectedFilter === "twitter"
+          className={`flex items-center justify-between rounded-lg px-4 py-3 cursor-pointer transition-all duration-200 ${selectedFilter === "twitter"
               ? "bg-zinc-800 text-white"
               : "text-zinc-400 hover:text-white hover:bg-zinc-800/40"
-          }`}
+            }`}
           onClick={() => handleFilterChange("twitter")}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -91,11 +90,10 @@ export function Sidebar({
 
         {/* YouTube Filter */}
         <div
-          className={`flex items-center justify-between rounded-lg px-4 py-3 cursor-pointer transition-all duration-200 ${
-            selectedFilter === "youtube"
+          className={`flex items-center justify-between rounded-lg px-4 py-3 cursor-pointer transition-all duration-200 ${selectedFilter === "youtube"
               ? "bg-zinc-800 text-white"
               : "text-zinc-400 hover:text-white hover:bg-zinc-800/40"
-          }`}
+            }`}
           onClick={() => handleFilterChange("youtube")}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -117,7 +115,6 @@ export function Sidebar({
           )}
         </div>
 
-        {/* Notes Link */}
         <Link
           to="/notes"
           className="flex items-center justify-between rounded-lg px-4 py-3 cursor-pointer transition-all duration-200 text-zinc-400 hover:text-white hover:bg-zinc-800/40"
@@ -127,9 +124,20 @@ export function Sidebar({
             <div className="font-medium text-sm truncate">Notes</div>
           </div>
         </Link>
+
+        <Link
+          to="/ai"
+          className="flex items-center justify-between rounded-lg px-4 py-3 cursor-pointer transition-all duration-200 text-zinc-400 hover:text-white hover:bg-zinc-800/40"
+        >
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="text-lg flex-shrink-0">🧠</div>
+            <div className="font-medium text-sm truncate">Brainly AI</div>
+          </div>
+        </Link>
+
+
       </div>
 
-      {/* Footer Section with User */}
       <div className="border-t border-zinc-800 pt-6 mt-auto">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg text-sm flex-shrink-0">

@@ -15,6 +15,7 @@ export const UserModel = model("User", UserSchema);
 const ContentSchema = new Schema({
   title: String,
   link: String,
+  description: String, 
   tags: [{ type: mongoose.Types.ObjectId, ref: "Tag" }],
   type: String,
   userId: [{ type: mongoose.Types.ObjectId, ref: "User", required: true }],
@@ -58,7 +59,6 @@ const NoteSchema = new Schema({
     default: Date.now,
   },
 });
-
 
 export const LinkModel = model("Links", LinkSchema);
 export const ContentModel = model("Content", ContentSchema);

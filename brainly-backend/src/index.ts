@@ -6,6 +6,12 @@ import { JWT_PASSWORD } from "./config";
 import { userMiddleware } from "./middleware";
 import cors from "cors";
 import mongoose from "mongoose";
+import Groq from "groq-sdk";
+import {
+  getYouTubeContent,
+  getTwitterContent,
+  getLatestNews,
+} from "./scraper"; // NEW: Import scraper
 
 const app = express();
 app.use(express.json());
@@ -61,6 +67,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
   const link = req.body.link;
   const type = req.body.type;
   const shareHash = req.body.shareHash;
+  const description = req.body.description; // NEW: Get description from frontend
 
   let userId = req.userId;
 
@@ -77,6 +84,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     link,
     type,
     title: req.body.title,
+    description: description || "", // NEW: Save description
     userId: userId,
     tags: [],
   });
@@ -220,9 +228,8 @@ app.post("/api/v1/note", userMiddleware, async (req, res) => {
       return res.status(400).json({ message: "Title is required" });
     }
 
-    // Get total notes count for this user to generate unique color
     const noteCount = await NoteModel.countDocuments({ userId: req.userId });
-    const colorIndex = noteCount % 10; // 10 colors available
+    const colorIndex = noteCount % 10;
 
     // @ts-ignore
     const note = await NoteModel.create({
@@ -336,6 +343,148 @@ app.post("/api/v1/note/:noteId/pin", userMiddleware, async (req, res) => {
   } catch (err) {
     console.error("Pin note error:", err);
     res.status(500).json({ message: "Failed to pin note" });
+  }
+});
+
+// ===== BRAINLY AI ENDPOINTS =====
+
+app.post("/api/v1/ai/ask", userMiddleware, async (req, res) => {
+  try {
+    const { question } = req.body;
+
+    if (!question || !question.trim()) {
+      return res.status(400).json({ message: "Question required" });
+    }
+
+    // @ts-ignore
+    const userId = req.userId;
+
+    console.log("Fetching user data for AI...");
+
+    // Fetch user's notes
+    const notes = await NoteModel.find({ userId });
+    const notesText = notes
+      .map((n) => `Note: ${n.title}\nContent: ${n.content}`)
+      .join("\n\n");
+
+    // Fetch user's content
+    const content = await ContentModel.find({ userId });
+
+    // NEW: Scrape actual content from links + get latest news
+    let enrichedContentText = "";
+
+    for (const item of content) {
+      //@ts-ignore
+      let text = `${item.type.toUpperCase()}: ${item.title}`;
+
+      try {
+        // NEW: Get actual content from link
+        if (item.type === "youtube" && item.link) {
+          console.log(`Fetching YouTube content for ${item.title}...`);
+          const youtubeData = await getYouTubeContent(
+            //@ts-ignore
+
+            item.link,
+            process.env.YOUTUBE_API_KEY || ""
+          );
+          if (youtubeData) {
+            text += `\nYouTube Details:\n${youtubeData}`;
+          }
+        } else if (item.type === "twitter" && item.link) {
+          console.log(`Fetching Twitter content for ${item.title}...`);
+          //@ts-ignore
+
+          const twitterData = await getTwitterContent(item.link);
+          if (twitterData) {
+            text += `\nTweet Content: ${twitterData}`;
+          }
+        }
+
+        // NEW: Add user's description if available
+        if (item.description) {
+          text += `\nUser Notes: ${item.description}`;
+        }
+
+        // NEW: Get latest news about this topic
+        console.log(`Fetching latest news about ${item.title}...`);
+        const newsData = await getLatestNews(
+          //@ts-ignore
+
+          item.title,
+          process.env.NEWS_API_KEY || ""
+        );
+        if (newsData) {
+          text += `\n\nLatest News about "${item.title}":\n${newsData}`;
+        }
+      } catch (itemErr) {
+        console.error(`Error processing content item: ${item.title}`, itemErr);
+        // Continue with other items if one fails
+      }
+
+      enrichedContentText += text + "\n\n";
+    }
+
+    // Build context
+    const prompt = `Based on this user's saved content and latest news:
+
+NOTES:
+${notesText || "No notes saved"}
+
+SAVED CONTENT WITH LATEST INFO:
+${enrichedContentText || "No content saved"}
+
+USER QUESTION: ${question}
+
+Answer based on ALL the information above - the user's saved content, actual content details, AND latest news. Provide the most current and comprehensive answer. If information is not available, say so honestly.`;
+
+    console.log("Sending to Groq with enriched context...");
+
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+
+    const message = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: "llama-3.3-70b-versatile",
+      max_tokens: 1000,
+    });
+
+    const answer =
+      message.choices[0]?.message?.content || "No answer generated";
+
+    res.json({
+      answer,
+      sources: {
+        notesCount: notes.length,
+        contentCount: content.length,
+      },
+    });
+  } catch (err) {
+    console.error("AI ask error:", err);
+    res.status(500).json({ message: "Failed to process question" });
+  }
+});
+
+app.get("/api/v1/ai/health", async (req, res) => {
+  try {
+    const groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+
+    await groq.chat.completions.create({
+      messages: [{ role: "user", content: "test" }],
+      model: "llama-3.3-70b-versatile",
+      max_tokens: 10,
+    });
+
+    res.json({ status: "AI is ready", ready: true });
+  } catch {
+    res.json({ status: "AI is offline", ready: false });
   }
 });
 
