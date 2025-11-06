@@ -4,6 +4,7 @@ import { BACKEND_URL } from "../../config";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { CrossIcon } from "../../icons/CrossIcon";
+import toast from "react-hot-toast";
 
 enum ContentType {
   Youtube = "youtube",
@@ -13,33 +14,78 @@ enum ContentType {
 interface CreateContentModalProps {
   open: boolean;
   onClose: () => void;
+  shareHash?: string;
+  onSuccess?: () => void;
 }
 
-export function CreateContentModal({ open, onClose }: CreateContentModalProps) {
+export function CreateContentModal({
+  open,
+  onClose,
+  shareHash,
+  onSuccess,
+}: CreateContentModalProps) {
   const titleRef = useRef<HTMLInputElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
   const [type, setType] = useState(ContentType.Youtube);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const detectContentType = (link: string): ContentType => {
+    if (!link) return ContentType.Youtube;
+
+    const lowercaseLink = link.toLowerCase().trim();
+
+    // Twitter/X detection - check first
+    if (lowercaseLink.includes("x.com") || lowercaseLink.includes("twitter.com")) {
+      return ContentType.Twitter;
+    }
+
+    // YouTube detection
+    if (
+      lowercaseLink.includes("youtube.com") ||
+      lowercaseLink.includes("youtu.be") ||
+      lowercaseLink.includes("youtube")
+    ) {
+      return ContentType.Youtube;
+    }
+
+    return ContentType.Youtube;
+  };
+
+  const handleLinkChange = () => {
+    const link = linkRef.current?.value || "";
+    const detectedType = detectContentType(link);
+    setType(detectedType);
+  };
 
   async function addContent() {
     const title = titleRef.current?.value;
     const link = linkRef.current?.value;
 
     if (!title || !link) {
-      alert("Please fill out all fields");
+      toast.error("Please fill out all fields");
       return;
     }
+
+    // Final detection before sending
+    const finalType = detectContentType(link);
 
     try {
       setIsSubmitting(true);
       await axios.post(
         `${BACKEND_URL}/api/v1/content`,
-        { link, title, type },
-        { headers: { Authorization: localStorage.getItem("token") } }
+        { link, title, type: finalType, shareHash },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
+
+      if (titleRef.current) titleRef.current.value = "";
+      if (linkRef.current) linkRef.current.value = "";
+      setType(ContentType.Youtube); // Reset to default
+
+      toast.success("Content added successfully!");
+      onSuccess?.();
       onClose();
     } catch {
-      alert("Something went wrong while adding content.");
+      toast.error("Failed to add content");
     } finally {
       setIsSubmitting(false);
     }
@@ -56,55 +102,40 @@ export function CreateContentModal({ open, onClose }: CreateContentModalProps) {
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-purple-900/70 backdrop-blur-sm animate-fadeIn"
+        className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm animate-fadeIn"
         onClick={onClose}
       ></div>
       <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="relative w-11/12 max-w-md bg-white/95 rounded-2xl shadow-lg border border-purple-100 p-8 animate-slideUp backdrop-blur-lg flex flex-col items-center">
+        <div className="relative w-11/12 max-w-md bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-2xl shadow-2xl border border-zinc-800 p-8 animate-slideUp backdrop-blur-lg flex flex-col items-center">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-purple-600 transition-colors"
-            title="Close"
+            className="absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors"
           >
-            <CrossIcon  />
+            <CrossIcon />
           </button>
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
               Add New Content
             </h2>
-            <p className="text-gray-500 text-sm mt-1">
+            <p className="text-zinc-500 text-sm mt-1">
               Paste your YouTube or Twitter link below
             </p>
           </div>
           <div className="flex flex-col gap-4 w-full items-center mb-6">
-            <Input reference={titleRef} placeholder="Enter title..." />
-            <Input reference={linkRef} placeholder="Paste link here..." />
+            <Input
+              reference={titleRef}
+              placeholder="Enter title..."
+              className="w-full bg-zinc-800/50 border border-zinc-700 text-white placeholder-zinc-500 px-4 py-3 rounded-xl focus:outline-none focus:border-zinc-600 transition-all"
+            />
+            <input
+              ref={linkRef}
+              type="text"
+              placeholder="Paste link here..."
+              onChange={handleLinkChange}
+              className="w-full bg-zinc-800/50 border border-zinc-700 text-white placeholder-zinc-500 px-4 py-3 rounded-xl focus:outline-none focus:border-zinc-600 transition-all"
+            />
           </div>
-          <div className="mb-6 w-full text-center">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Select Content Type</h3>
-            <div className="flex justify-center gap-3">
-              <button
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  type === ContentType.Youtube
-                    ? "bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-md scale-105"
-                    : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                }`}
-                onClick={() => setType(ContentType.Youtube)}
-              >
-                YouTube
-              </button>
-              <button
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  type === ContentType.Twitter
-                    ? "bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-md scale-105"
-                    : "bg-gray-100 hover:bg-gray-200 text-gray-600"
-                }`}
-                onClick={() => setType(ContentType.Twitter)}
-              >
-                Twitter (X)
-              </button>
-            </div>
-          </div>
+
           <div className="w-full max-w-xs">
             <Button
               onClick={addContent}

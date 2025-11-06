@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { BACKEND_URL } from "../config";
 
 interface ContentItem {
+  createdAt: string | number | Date;
+  createdAt: string | number | Date;
   _id: string;
   title: string;
   link: string;
