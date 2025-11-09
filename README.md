@@ -43,7 +43,7 @@ A powerful web application that helps you save, organize, and interact with cont
 
 ### Clone the Repository
 
-git clone https://github.com/yourusername/brainly.git
+git clone (https://github.com/saad-78/Brainly.git)
 cd brainly
 
 
@@ -192,7 +192,6 @@ The app is fully responsive with:
 Remove type checking from build
 In package.json, change "build": "tsc -b && vite build"
 To: "build": "vite build"
-text
 
 
 ## 📝 License
@@ -201,7 +200,7 @@ MIT License - feel free to use this project for learning or production.
 
 ## 👨‍💻 Author
 
-Built with ⚡ by Ares (Your Name)
+Built with by Saad
 
 ---
 
