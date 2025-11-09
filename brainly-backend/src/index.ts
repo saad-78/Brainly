@@ -11,7 +11,7 @@ import {
   getYouTubeContent,
   getTwitterContent,
   getLatestNews,
-} from "./scraper"; // NEW: Import scraper
+} from "./scraper"; 
 
 const app = express();
 app.use(express.json());
@@ -424,7 +424,6 @@ app.post("/api/v1/ai/ask", userMiddleware, async (req, res) => {
       enrichedContentText += text + "\n\n";
     }
 
-    // Build context
     const prompt = `Based on this user's saved content and latest news:
 
 NOTES:
