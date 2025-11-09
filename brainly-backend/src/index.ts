@@ -487,6 +487,22 @@ app.get("/api/v1/ai/health", async (req, res) => {
   }
 });
 
+
+app.all("/api/v1/health", (req, res) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[HEALTH CHECK] Pinged at ${timestamp} via ${req.method}`);
+  
+  res.status(200).json({
+    status: "alive",
+    timestamp: timestamp,
+    uptime: process.uptime(),
+    message: "Server is running"
+  });
+});
+
+
+
+
 app.listen(3000, () => {
   console.log("Server started on 3000");
 });
