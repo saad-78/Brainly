@@ -60,23 +60,6 @@ cp .env.example .env
 
 
 
-**Backend `.env` Configuration:**
-
-MONGODB_URI=mongodb://localhost:27017/brainly
-JWT_SECRET=your-super-secret-jwt-key-here
-PORT=3000
-GROQ_API_KEY=your-groq-api-key
-YOUTUBE_API_KEY=your-youtube-api-key
-NEWS_API_KEY=your-news-api-key
-NODE_ENV=development
-
-text
-undefined
-Run backend
-npm run dev
-
-text
-
 ### Frontend Setup
 
 cd frontend
