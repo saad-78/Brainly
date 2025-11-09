@@ -76,12 +76,9 @@ text
 
 VITE_BACKEND_URL=http://localhost:3000
 
-text
-undefined
 Run frontend
 npm run dev
 
-text
 
 The app will be available at `http://localhost:5173`
 
