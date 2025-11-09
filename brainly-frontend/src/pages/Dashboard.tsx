@@ -194,7 +194,7 @@ export function Dashboard() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
               B
             </div>
-            <span className="text-white font-semibold text-lg">Braily</span>
+            <span className="text-white font-semibold text-lg">Brainly</span>
           </div>
           <button
             onClick={handleLogout}
@@ -292,7 +292,7 @@ export function Dashboard() {
               <circle cx="15" cy="10" r="1" />
               <path d="M9 14c1 1 3 1 4 0" />
             </svg>
-            Chat with Braily AI
+            Chat with Brainly AI
           </button>
 
           {copied && (

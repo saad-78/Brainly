@@ -56,13 +56,11 @@ export function Signin() {
 
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-black via-zinc-950 to-black flex justify-center items-center p-4">
-      {/* Background glow effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl opacity-20"></div>
       </div>
 
       <div className="relative bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-3xl shadow-2xl border border-zinc-800/50 backdrop-blur-xl w-full max-w-md p-8 flex flex-col items-center">
-        {/* Logo/Header */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent mb-2">
             Welcome Back
@@ -70,14 +68,12 @@ export function Signin() {
           <p className="text-zinc-500 text-sm">Sign in to your Brainly account</p>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="w-full mb-4 bg-red-500/10 border border-red-500/30 text-red-300 text-sm px-4 py-2 rounded-lg">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <div className="flex flex-col gap-4 w-full mb-6">
           <div>
             <label className="text-zinc-400 text-sm font-medium mb-2 block">
@@ -86,9 +82,8 @@ export function Signin() {
             <Input
               reference={usernameRef}
               placeholder="Enter your username"
-             
               className="w-full bg-zinc-800/50 border border-zinc-700 text-white placeholder-zinc-500 px-4 py-3 rounded-xl focus:outline-none focus:border-zinc-600 transition-all"
-             //@ts-ignore
+              //@ts-ignore
               onKeyPress={handleKeyPress}
             />
           </div>
@@ -97,18 +92,16 @@ export function Signin() {
             <label className="text-zinc-400 text-sm font-medium mb-2 block">
               Password
             </label>
-            <Input
-              reference={passwordRef}
-              placeholder="Enter your password"
-             //@ts-ignore
+            <input
+              ref={passwordRef}
               type="password"
+              placeholder="Enter your password"
               className="w-full bg-zinc-800/50 border border-zinc-700 text-white placeholder-zinc-500 px-4 py-3 rounded-xl focus:outline-none focus:border-zinc-600 transition-all"
               onKeyPress={handleKeyPress}
             />
           </div>
         </div>
 
-        {/* Sign In Button */}
         <div className="w-full">
           <Button
             onClick={signin}
@@ -119,7 +112,6 @@ export function Signin() {
           />
         </div>
 
-        {/* Sign Up Link */}
         <p className="text-zinc-500 text-sm mt-6 text-center">
           Don't have an account?{" "}
           <span
